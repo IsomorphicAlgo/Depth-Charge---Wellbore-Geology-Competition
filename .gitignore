@@ -1,5 +1,7 @@
 agents.md
 plan.md
-data/train/
-data/test/
 Wellbore Prompt.md
+.cursor
+/data/AI_wellbore_geology_prediction_task_en.pptx
+/data/train
+/data/test
