@@ -33,6 +33,11 @@ On the signal side, the deck pushes a geosteering-flavored narrative: match the 
 
 None of that text replaces a real validation plan, but it does explain why a naive “concatenate both CSVs and feed a tabular model” might leave money on the table compared to something that respects **directionality** and **PS truncation**.
 
+### Further reading (domain context)
+
+- [Geosteering & LWD overview — ScienceDirect Topics](https://www.sciencedirect.com/topics/engineering/logging-while-drilling)
+- [SPE paper: Geosteering using Gamma Ray (OnePetro)](https://onepetro.org/SPEATCE/proceedings/25ATCE/25ATCE/D021S015R008/792004)
+
 ## Why documentation leads the repo
 
 The project owner’s brief treats this work as a **learning exercise** first and a competition entry second. Leading with `ReadMe.md` and this file keeps goals, constraints, and compliance visible. It also matches how many strong Kaggle write-ups are structured: the story of the solution is as important as the code for reproducibility and for prize verification.

@@ -53,6 +53,11 @@ Roughly **200** evaluation wells. Each has the same two CSV types: **horizontal_
 2. Accept the competition rules on Kaggle and download the data into this project. A layout that matches the exploratory script is **`data/train/`** and **`data/test/`** (CSV pairs per well under each). Some competitors keep **`train/`** and **`test/`** at the repository root instead; `explore_data.py` still picks those up when it walks from the repo root. Whatever layout you choose, remember competition data is sponsor-controlled: do not push it to a public remote unless you are comfortable with that exposure and with repo size.  
 3. Skim `Methodology.md` for how decisions will be documented as the project evolves.
 
+## Background reading
+
+- [Geosteering & LWD overview — ScienceDirect Topics](https://www.sciencedirect.com/topics/engineering/logging-while-drilling)
+- [SPE paper: Geosteering using Gamma Ray (OnePetro)](https://onepetro.org/SPEATCE/proceedings/25ATCE/25ATCE/D021S015R008/792004)
+
 ## Data and compliance
 
 Competition data is for **competition use on Kaggle** only, per the sponsor rules. Do not redistribute raw competition files outside approved channels. For a full legal read, use Kaggle’s rules UI and `rules.md` here as a convenience copy.
