@@ -8,6 +8,7 @@ This repository supports a learning-focused entry in the [ROGII - Wellbore Geolo
 - **`Methodology.md`** — why the project is organized the way it is, and how modeling choices will be recorded as they land.
 - **`rules.md`** — a local copy of the competition rules text for quick reference. The authoritative version remains on the [competition website](https://www.kaggle.com/competitions/rogii-wellbore-geology-prediction).
 - **`Wellbore Prompt.md`** — the project owner’s brief and constraints for collaborators and tooling.
+- **`data/AI_wellbore_geology_prediction_task_en.pptx`** — sponsor task deck (maps, 3D context, GR–TVT intuition, and the scoring definition). Handy when someone wants the pictures, not just the CSV column list.
 
 The repository is intentionally lightweight at the start: documentation and governance first, then notebooks, code, and reproducible pipelines once modeling work begins.
 
@@ -16,6 +17,13 @@ The repository is intentionally lightweight at the start: documentation and gove
 - **Sponsor:** ROGII  
 - **Theme:** Build models that help interpret geology along horizontal wellbores from operational and log-derived signals, supporting safer and more efficient drilling decisions.  
 
+## What the model is actually predicting
+
+In one sentence: along each **horizontal** well, the job is to recover **TVT** (the geology position on a true-vertical-thickness axis) at **one-foot** increments, including the lateral **after** a fixed **prediction start (PS)** where only partial TVT is given as input.
+
+The competition ships each well as **two CSVs** — the lateral (`*_horizontal_well.csv`) and a paired vertical **typewell** (`*_typewell__*.csv`). Inputs lean on **MD**, **XYZ**, **GR** on the lateral, plus **GR** and **TVT** (and named geology) on the typewell. Training rows also carry the full manual TVT and formation tops so people can learn the mapping; scoring cares about how well TVT is continued past PS.
+
+**Evaluation** (when labels exist) is RMSE on **dTVT = manualTVT − predictedTVT** across those foot-by-foot points. The sponsor deck spells out the same story with diagrams; `Methodology.md` goes a bit deeper on how they expect people to think about GR versus TVT.
 
 ## Getting started
 

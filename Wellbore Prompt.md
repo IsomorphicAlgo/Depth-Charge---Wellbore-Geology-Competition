@@ -8,7 +8,7 @@ https://www.kaggle.com/competitions/rogii-wellbore-geology-prediction
 # Important things to remember
 Agent Notes (for the Agent.md):
 1. This is a learning experience. Only code what I explicitely ask for. 
-2. write documents in a 3rd party professional - slightly laid back tone.
+2. write documents in a third-person professional - slightly laid back tone.
 3. Add these to the git.ignore and do not reference them in other docs or code files:
     agent.md
     plan.md
