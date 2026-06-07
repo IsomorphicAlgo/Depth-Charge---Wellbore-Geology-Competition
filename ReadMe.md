@@ -10,7 +10,9 @@ This repository supports a learning-focused entry in the [ROGII - Wellbore Geolo
 - **`Wellbore Prompt.md`** — the project owner’s brief and constraints for collaborators and tooling.
 - **`data/AI_wellbore_geology_prediction_task_en.pptx`** — sponsor task deck (maps, 3D context, GR–TVT intuition, and the scoring definition). Handy when someone wants the pictures, not just the CSV column list.
 - **`explore_data.py`** — lightweight EDA over local files: CSV inventory (horizontal, typewell, and any other CSVs such as `sample_submission.csv`), **PNG** counts under the same trees, a crude stem match between PNGs and lateral CSVs, plus dtypes, missingness, MD steps, and a few TVT checks. Optional Pillow for image dimensions on a few samples. Searches `data/`, **`data/train`** and **`data/test`**, and the repo root.
-- **`wellbore_report.ipynb`** — working report and progress log (introduction, data analysis, tidy, model choice, trials, conclusion, references).
+- **`wellbore_cv.py`** — build a **4-fold (configurable) validation manifest grouped by lateral well id** (`cv_manifests/kfold4_well_folds.csv`); run `python wellbore_cv.py` after tidying or refreshing training files. Defaults to **`data/train_tidy/`** when that folder exists.
+- **`cv_manifests/`** — holds the per-well fold table (see `README.md` inside that folder).
+- **`wellbore_report.ipynb`** — working report and progress log (introduction, data analysis, tidy, CV split, model choice, trials, conclusion, references).
 
 The repository is intentionally lightweight at the start: documentation and governance first, then notebooks, code, and reproducible pipelines once modeling work begins.
 
@@ -45,7 +47,7 @@ Static visualization of the well path and geological cross-section for that well
 
 ### `test/` split (evaluation)
 
-Roughly **200** evaluation wells. Each has the same two CSV types: **horizontal_well** (trajectory and logs, with **TVT** masked as **NaN** in the evaluation zone) and **typewell** (vertical reference). There is no labeled TVT to train on in that zone—models predict it for submission.
+Roughly **200** evaluation wells. Each has the same two CSV types: **horizontal_well** (trajectory and logs, with **TVT** masked as **NaN** in the evaluation zone) and **typewell** (vertical reference). There is no labeled TVT to train on in that zone—models predict it for submission. After downloading **`data/test/`**, run the tidy section in **`wellbore_report.ipynb`**: it writes GR-imputed horizontal and typewell CSVs (plus the same **Geology** forward-fill rule on typewells and optional **PNG** mirrors) under **`data/tidytest/`**, leaving raw **`data/test/`** unchanged—the parallel of **`data/train_tidy/`** for training.
 
 ## Getting started
 

@@ -25,6 +25,24 @@ Units in the materials are **feet**; keep that in mind when mixing in external l
 
 Where manual TVT is available, define **dTVT = manualTVT − predictedTVT** at each predicted foot. The leaderboard story is **RMSE over all those dTVT values** — a plain L2 on TVT error, no fancy weighting mentioned in the deck.
 
+### LightGBM (`LGBMRegressor`) — common parameters
+
+The table below records the usual knobs for tabular regression in scikit-learn’s LightGBM API. Ranges are **starting guides** for tuning, not fixed rules; early stopping on a held-out validation fold is generally preferred to guessing a large `n_estimators` in isolation.
+
+| Parameter | What it does | Typical range / note |
+| --- | --- | --- |
+| **`n_estimators`** | Number of boosting trees (rounds). More capacity; interacts strongly with `learning_rate`. | Often **200–2000+**; pair with **early stopping** instead of a single fixed count. |
+| **`learning_rate`** | Shrinkage applied per tree; smaller steps usually need more trees but can **generalize** better. | **0.01–0.1**; **0.03–0.05** is a common band when combined with enough rounds and early stopping. |
+| **`num_leaves`** | Maximum leaves per tree (leaf-wise growth); main **complexity** control. Higher values are more flexible and easier to overfit. | **15–127**; **31–63** is a frequent default band; reduce if validation gap is large, increase cautiously if the model underfits. |
+| **`max_depth`** | Optional hard cap on tree depth; limits interaction depth together with `num_leaves`. | **−1** (no cap) in the API sense of “unset,” or **5–12** when a simpler bias is desired. |
+| **`min_child_samples`** | Minimum **training samples** required in a leaf; larger values yield smoother fits and less overfitting. | **20–150**; increase when train–validation error diverges. |
+| **`subsample`** | Fraction of **rows** sampled for each tree (bagging). | **0.6–1.0**; **0.7–0.9** is common. |
+| **`colsample_bytree`** | Fraction of **features** sampled for each tree. | **0.6–1.0**; **0.7–0.9** is common. |
+| **`reg_lambda`** / **`reg_alpha`** | **L2** / **L1** regularization on leaf scores. | `reg_lambda`: **0–10** (often **0–5**); `reg_alpha`: **0–1** when sparser splits are desired. |
+| **`min_split_gain`** | Minimum loss reduction required to create a split; suppresses very weak splits. | **0–0.1**; small positive values can reduce noise-driven splits. |
+
+A practical tuning order on a fixed validation protocol (e.g. well-grouped folds): enable **early stopping** on `n_estimators`, then adjust **`learning_rate`** and **`num_leaves`**, then **`min_child_samples`**, then **subsample** / **colsample_bytree**, then light **`reg_lambda`**. That order usually returns more improvement than chasing exotic settings before the basics are stable.
+
 ### How the sponsor suggests people think about it
 
 The geology can be **flat or dipping**, and the **horizontal azimuth** relative to dip matters for what the lateral cuts through. Neighboring wells are waved in as qualitative support: dips tend to behave similarly in a neighborhood, so offset thinking is on the table if someone wants to engineer spatial features later.
@@ -55,7 +73,7 @@ Having the competition rules text available offline speeds up double-checking su
 When code and notebooks appear, this document will grow in a predictable pattern:
 
 1. **Task framing** — exact prediction target, units, and any class imbalance or sequence structure.  
-2. **Data hygiene** — what is never leaked from validation into training, and how folds or wells are grouped.  
+2. **Data hygiene** — what is never leaked from validation into training, and how folds or wells are grouped. Tidied mirrors of raw competition CSVs (`data/train_tidy/` for **`data/train/`**, `data/tidytest/` for **`data/test/`**) are produced in `wellbore_report.ipynb` using the same GR imputation and typewell **Geology** forward-fill rules; originals stay read-only in **`train`** / **`test`**. **4-fold CV by lateral well id** is recorded in `cv_manifests/kfold4_well_folds.csv` via **`wellbore_cv.py`** (or the CV cells in **`wellbore_report.ipynb`**) so no well is split across train and validation within a fold.  
 3. **Baselines** — the simplest defensible model and its score; everything else is compared to that.  
 4. **Experiments** — one paragraph per meaningful try: idea, change, metric, keep or discard.  
 5. **Final submission** — what was selected, why, and what would be tried next with more time.
