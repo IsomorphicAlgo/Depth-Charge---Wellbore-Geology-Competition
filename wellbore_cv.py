@@ -59,7 +59,7 @@ def default_train_root() -> Path:
 def build_well_fold_manifest(
     data_root: Path,
     *,
-    n_splits: int = 4,
+    n_splits: int = 5,
     random_state: int = 42,
 ) -> pd.DataFrame:
     """
