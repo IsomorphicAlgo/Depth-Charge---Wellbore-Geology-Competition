@@ -11,8 +11,15 @@ This repository supports a learning-focused entry in the [ROGII - Wellbore Geolo
 - **`data/AI_wellbore_geology_prediction_task_en.pptx`** — sponsor task deck (maps, 3D context, GR–TVT intuition, and the scoring definition). Handy when someone wants the pictures, not just the CSV column list.
 - **`explore_data.py`** — lightweight EDA over local files: CSV inventory (horizontal, typewell, and any other CSVs such as `sample_submission.csv`), **PNG** counts under the same trees, a crude stem match between PNGs and lateral CSVs, plus dtypes, missingness, MD steps, and a few TVT checks. Optional Pillow for image dimensions on a few samples. Searches `data/`, **`data/train`** and **`data/test`**, and the repo root.
 - **`wellbore_cv.py`** — build a **4-fold (configurable) validation manifest grouped by lateral well id** (`cv_manifests/kfold4_well_folds.csv`); run `python wellbore_cv.py` after tidying or refreshing training files. Defaults to **`data/train_tidy/`** when that folder exists.
+- **`wellbore_join.py`** — **canonical lateral–typewell TVT join** (`merge_lateral_typewell_schema_tvt`, `attach_typewell_by_tvt`, `load_well_pair`); imported from **`wellbore_report V3.ipynb`** so join logic is not duplicated in long notebook cells.
+- **`wellbore_join_diagnostics.py`** — per-well **join QA** (`lateral_typewell_join_diagnostics`, `diagnostics_dataframe_for_well_ids`, `discover_sorted_well_ids`) for Iteration 2–style tables.
+- **`wellbore_join_batch.py`** — **batch join summary** over all training wells (`summarize_join_for_training_wells`, join-risk heuristic, optional histograms); CLI: `python wellbore_join_batch.py --help`.
+- **`wellbore_geology.py`** — **fold-safe geology encoding** (`build_geology_code_map`, `encode_merged_tw_geology`, `KNOWN_FORMATION_ORDER`) shared by the notebook and LightGBM CV cell.
+- **`wellbore_features.py`** — optional **along-hole rolling** tabular features (mean, median, gradient vs MD over configurable foot windows), used from **`wellbore_report V3.ipynb`** after the lateral–typewell join.
 - **`cv_manifests/`** — holds the per-well fold table (see `README.md` inside that folder).
 - **`wellbore_report.ipynb`** — working report and progress log (introduction, data analysis, tidy, CV split, model choice, trials, conclusion, references).
+- **`wellbore_report V3.ipynb`** — Version 3 working notebook (extends the V2 tabular stack toward richer sequence-style features and Kaggle submission inference).
+- **`V3_plan.md`** — phased, approval-gated plan for Version 3 (rolling features, lags, boundary distance, submission CSV).
 
 The repository is intentionally lightweight at the start: documentation and governance first, then notebooks, code, and reproducible pipelines once modeling work begins.
 
