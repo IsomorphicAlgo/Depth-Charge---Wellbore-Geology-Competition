@@ -44,7 +44,7 @@ This document breaks **Version 3** into small milestones. Each milestone ends wi
 
 **Goal:** Add **tabular** rolling **mean / median / gradient** (or slope vs MD) over **5, 10, 20 ft** on selected curves, computed **within each lateral well** on the merged foot grid.
 
-**Shipped:** `wellbore_features.add_alonghole_roll_features` plus integration in **`wellbore_report V3.ipynb`** (LightGBM cell: `USE_V3_ROLL_FEATURES`). Toggle off to reproduce the pre-V3 feature set for ablations.
+**Shipped:** `wellbore_features.add_alonghole_roll_features` plus integration in **`wellbore_report V3.ipynb`** (LightGBM cell: `USE_V3_ROLL_FEATURES`). **`wellbore_report V2.ipynb`** uses the same helpers with `USE_MILESTONE1_ROLL_FEATURES` for side-by-side CV. Toggle either flag off to reproduce the pre-rolling feature set for ablations.
 
 **Tuning / ablations**
 
@@ -60,20 +60,28 @@ This document breaks **Version 3** into small milestones. Each milestone ends wi
 - **Gradients:** useful for TVT-like curvature; slightly noisier than means unless smoothed.
 
 **Gate 1 question:** After reviewing CV deltas and column list, proceed to lags as specified, or trim the rolling set first?
-
+**Gate 1 Answer:** Keep the column list
 ---
 
-## Milestone 2 — Lag features (approval gate 2)
+## Milestone 2 — Lag features (approval gate 2) — **implemented**
 
 **Goal:** Compare each foot to **history along hole** (e.g. lateral **GR** at **current MD** vs **3 ft behind** along MD / foot index): differences, ratios, or z-scores **within well**.
 
+**Shipped:** `wellbore_features.add_alonghole_lag_features` and `lag_feature_column_names`. Defaults: **3 / 5 / 10 ft** (integer row shifts after per-well MD sort), curves **MD**, **Z**, **`tw_GR_interp`**, **GR**; kinds **lag**, **diff**, **ratio** (ratio uses a small `ratio_abs_floor` so near-zero lag denominators become NaN). **`wellbore_report V3.ipynb`:** `USE_V3_LAG_FEATURES`. **`wellbore_report V2.ipynb`:** `USE_MILESTONE2_LAG_FEATURES`.
+
 **Deliverables**
 
-- Explicit **lag in feet** (3 ft → 3 rows) with clear naming (e.g. **`gr_lag3`**, **`gr_diff_lag3`**).
+- Explicit **lag in feet** (3 ft → 3 rows) with clear naming (e.g. **`gr_lag3`**, **`gr_diff_lag3`** in the plan sketch). **Implementation** uses the same curve tokens as rolling features (e.g. **`GR_lag3ft`**, **`GR_diff_lag3ft`**, **`GR_ratio_lag3ft`**) so columns stay grep-friendly and consistent with **`GR_roll5ft_mean`**.
 - Document edge behavior at the **start of the lateral** (NaN vs fill policy).
 
-**Gate 2 question:** Keep the proposed lag set, or cap at one lag distance until RMSE stabilizes?
+**Edge behavior:** No cross-well padding. For lag **k**, the first **k** MD-sorted rows of each lateral have **NaN** for lag, diff, and ratio.
 
+**Tuning / ablations**
+
+- Defaults in **`wellbore_features.py`**: `DEFAULT_LAG_FEET`, `DEFAULT_LAG_VALUE_COLS`, `DEFAULT_LAG_KINDS`. Notebook toggles: **`USE_V3_LAG_FEATURES`** (V2: **`USE_MILESTONE2_LAG_FEATURES`**).
+
+**Gate 2 question:** Keep the proposed lag set, or cap at one lag distance until RMSE stabilizes?
+**Gate 2 Answer:** Keep the proposed lag set
 ---
 
 ## Milestone 3 — Distance to typewell geology boundary (approval gate 3)
