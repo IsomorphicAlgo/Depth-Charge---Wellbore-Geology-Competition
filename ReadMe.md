@@ -20,6 +20,7 @@ This repository supports a learning-focused entry in the [ROGII - Wellbore Geolo
 - **`wellbore_report.ipynb`** — working report and progress log (introduction, data analysis, tidy, CV split, model choice, trials, conclusion, references).
 - **`wellbore_report V3.ipynb`** — Version 3 working notebook (extends the V2 tabular stack toward richer sequence-style features and Kaggle submission inference).
 - **`V3_plan.md`** — phased, approval-gated plan for Version 3 (rolling features, lags, boundary distance, submission CSV).
+- **`results/`** — offline trial mirrors (`v2_cv_trials_table.csv`, `v3_cv_trials_table.csv`; see `results/README.md`).
 
 The repository is intentionally lightweight at the start: documentation and governance first, then notebooks, code, and reproducible pipelines once modeling work begins.
 
