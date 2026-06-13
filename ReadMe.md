@@ -17,9 +17,11 @@ This repository supports a learning-focused entry in the [ROGII - Wellbore Geolo
 - **`wellbore_geology.py`** — **fold-safe geology encoding** (`build_geology_code_map`, `encode_merged_tw_geology`, `KNOWN_FORMATION_ORDER`) shared by the notebook and LightGBM CV cell.
 - **`wellbore_features.py`** — optional **along-hole** tabular features: **rolling** (mean, median, gradient vs MD over configurable foot windows) and **lags** (lag / diff / ratio vs 3/5/10 ft back along MD), used from **`wellbore_report V3.ipynb`** / **`wellbore_report V2.ipynb`** after the lateral–typewell join.
 - **`wellbore_v3_feature_corr_heatmap.py`** — optional **Pearson correlation heatmap** (saved PNG) for one **`train_tidy`** lateral CSV, the paired typewell join, and **Milestones 1–2** engineered columns; run `python wellbore_v3_feature_corr_heatmap.py --help`.
+- **`wellbore_feature_pruning.py`** — **greedy Pearson pruning** (`prune_correlated_features`) for wide merged frames, plus helpers to **stack** training wells, **export** pruned merged CSVs under **`data/tabular_pruned/train/`** and **`data/tabular_pruned/test/`**, and **load** those pre-merged exports. The working entry point is **`wellbore_report V3_pruned.ipynb`** (copy of the V3 report); raw **`data/train`** / **`data/test`** and the tidy mirrors are not modified.
 - **`cv_manifests/`** — holds the per-well fold table (see `README.md` inside that folder).
 - **`wellbore_report.ipynb`** — working report and progress log (introduction, data analysis, tidy, CV split, model choice, trials, conclusion, references).
 - **`wellbore_report V3.ipynb`** — Version 3 working notebook (extends the V2 tabular stack toward richer sequence-style features and Kaggle submission inference).
+- **`wellbore_report V3_pruned.ipynb`** — V3 copy wired to **`wellbore_feature_pruning`**: optional export of correlation-pruned **merged** tabular CSVs into **`data/tabular_pruned/`** and an optional **`USE_TABULAR_PRUNED_TRAIN`** switch in the LightGBM cell to CV on that tree.
 - **`V3_plan.md`** — phased, approval-gated plan for Version 3 (rolling features, lags, boundary distance, submission CSV).
 - **`results/`** — offline trial mirrors (`v2_cv_trials_table.csv`, `v3_cv_trials_table.csv`; see `results/README.md`) and optional **`v3_feature_corr_heatmap.png`** from `wellbore_v3_feature_corr_heatmap.py`.
 
