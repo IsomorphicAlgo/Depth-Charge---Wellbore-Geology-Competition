@@ -167,6 +167,32 @@ def _read_numeric_typewell(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+def _ensure_lateral_tvt_for_join(
+    lateral_df: pd.DataFrame,
+    *,
+    allow_tvt_input_fallback: bool,
+) -> pd.DataFrame:
+    """
+    Guarantee a numeric ``TVT`` column for :func:`attach_typewell_by_tvt`.
+
+    Training laterals always carry ``TVT``. Tidied **test** horizontals may omit it
+    and only ship ``TVT_input``; when ``allow_tvt_input_fallback`` is True, copy
+    ``TVT_input`` into ``TVT``, and fill NaN ``TVT`` from ``TVT_input`` where both exist.
+    """
+    out = lateral_df.copy()
+    if "TVT" not in out.columns:
+        if allow_tvt_input_fallback and "TVT_input" in out.columns:
+            out["TVT"] = out["TVT_input"]
+        else:
+            raise KeyError(
+                "lateral horizon CSV has no 'TVT' column. Tidied test horizontals may only "
+                "have 'TVT_input'; export with allow_tvt_input_fallback=True for that split."
+            )
+    elif allow_tvt_input_fallback and "TVT_input" in out.columns:
+        out["TVT"] = out["TVT"].fillna(out["TVT_input"])
+    return out
+
+
 def load_premerged_lateral_csv(
     lateral_path: Path,
     *,
@@ -195,11 +221,16 @@ def load_merged_with_alonghole_features(
     well_id: str | None = None,
     use_roll: bool = True,
     use_lag: bool = True,
+    allow_tvt_input_fallback: bool = False,
 ) -> pd.DataFrame | None:
     """
     Load tidied lateral + paired typewell, join on TVT, add roll/lag like the V3 notebook.
 
     ``well_id`` defaults to the stem parsed from ``*__horizontal_well.csv``.
+
+    ``allow_tvt_input_fallback``: set True for **test** tidied horizontals that omit ``TVT``
+    (see :func:`_ensure_lateral_tvt_for_join`). Leave False for training so ``TVT`` is never
+    silently borrowed from ``TVT_input``.
     """
     if not lateral_path.is_file():
         return None
@@ -213,6 +244,9 @@ def load_merged_with_alonghole_features(
         return None
 
     lateral_df = _read_numeric_horizon(pd.read_csv(lateral_path))
+    lateral_df = _ensure_lateral_tvt_for_join(
+        lateral_df, allow_tvt_input_fallback=allow_tvt_input_fallback
+    )
     typewell_df = _read_numeric_typewell(pd.read_csv(typewell_path))
     merged = attach_typewell_by_tvt(lateral_df, typewell_df)
     merged["well_id"] = wid
@@ -257,12 +291,16 @@ def export_pruned_merged_tabular(
     *,
     use_roll: bool = True,
     use_lag: bool = True,
+    allow_tvt_input_fallback: bool = False,
 ) -> int:
     """
     Write one merged CSV per lateral under ``dest_root``, mirroring relative paths from ``data_root``.
 
     Only columns present in both the merged frame and ``keep_columns`` are written
     (stable order follows ``keep_columns``). Returns the number of files written.
+
+    For **tidytest** (or any split where lateral CSVs lack ``TVT``), pass
+    ``allow_tvt_input_fallback=True`` so ``TVT_input`` backs the typewell join.
     """
     keep_list = list(keep_columns)
     dest_root.mkdir(parents=True, exist_ok=True)
@@ -272,6 +310,7 @@ def export_pruned_merged_tabular(
             lateral_path,
             use_roll=use_roll,
             use_lag=use_lag,
+            allow_tvt_input_fallback=allow_tvt_input_fallback,
         )
         if merged is None:
             continue
