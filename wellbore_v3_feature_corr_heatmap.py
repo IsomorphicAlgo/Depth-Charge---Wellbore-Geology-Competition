@@ -29,6 +29,7 @@ import pandas as pd
 
 import wellbore_cv as wcv
 import wellbore_features as wbfeat
+import wellbore_geology_boundary as wbgb
 from wellbore_join import attach_typewell_by_tvt
 
 REPO_ROOT = Path(__file__).resolve().parent
@@ -110,6 +111,7 @@ def build_merged_with_v3_features(lateral_path: Path) -> pd.DataFrame:
     else:
         merged["TVT_input_ffill"] = np.nan
 
+    merged = wbgb.add_tw_geology_next_change_ft(merged, typewell_df)
     merged = wbfeat.add_alonghole_roll_features(merged)
     merged = wbfeat.add_alonghole_lag_features(merged)
     return merged
@@ -120,9 +122,10 @@ def _corr_column_order(merged: pd.DataFrame, *, include_target: bool) -> list[st
     if not include_target and "TVT" in base:
         base.remove("TVT")
 
+    m3 = list(wbgb.milestone3_feature_column_names())
     roll = wbfeat.roll_feature_column_names(available_cols=merged.columns)
     lag = wbfeat.lag_feature_column_names(available_cols=merged.columns)
-    ordered = base + roll + lag
+    ordered = base + m3 + roll + lag
 
     numeric: list[str] = []
     for c in ordered:

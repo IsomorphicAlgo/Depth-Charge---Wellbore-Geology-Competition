@@ -91,17 +91,22 @@ This document breaks **Version 3** into small milestones. Each milestone ends wi
 **Risks**
 
 - Label noise or single-foot flips can create spurious boundaries; optional **minimum run length** or merge of repeats may be needed.
-
+lets impliment 
 **Gate 3 question:** Ship v1 as raw “feet to next label change,” or add a smoothing rule first?
 
 ---
 
-## Milestone 4 — Test inference and submission CSV (approval gate 4)
+## Milestone 4 — Test inference and submission CSV (approval gate 4) — **implemented**
 
 **Goal:** **Inference-only** path on **`data/test/`** (or **`data/tidytest/`** if tidying stays the source) that outputs **`submission.csv`** (or similar) with:
 
 - **Same row count and order** as **`data/sample_submission.csv`** (or a documented join to it),
 - Columns exactly **`id`** and **`tvt`**, dtypes and formatting acceptable to Kaggle.
+
+**Shipped**
+
+- **`wellbore_submission.py`** — ``run_submission_pipeline`` / CLI: load **tidied** train + test laterals (defaults: ``wellbore_cv.default_train_root()`` / ``default_test_root()``), build the same join + roll/lag + Milestone 3 stack as the V3 LightGBM cell (via ``wellbore_feature_pruning.load_merged_with_alonghole_features``), fit a **full-train** LightGBM on non-null manual **TVT** (or load a pickle from ``--model-in``), select each test well’s **MD-sorted** rows using Kaggle’s **1-based foot indices** parsed from ``sample_submission.csv`` (contiguous sub-range per well; the sample row count can be smaller than the full horizontal CSV), assert row count and **id order** match the sample file, optional **tvt** rounding (default 6 decimals). Writes e.g. ``results/submission.csv``. Geology vocabulary for encoding is pooled from **typewell ``Geology`` columns** only (fast pass) before the heavy train stack. **Test typewells** may omit ``Geology``; ``wellbore_join`` still emits ``tw_Geology`` (all missing) so ``tw_geology_code`` is fold-safe code **0** on those feet.
+- **`wellbore_cv.default_test_root()`** — prefers ``data/tidytest`` **only when it contains lateral CSVs**; otherwise ``data/test``.
 
 **Deliverables**
 

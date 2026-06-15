@@ -18,6 +18,7 @@ import pandas as pd
 
 import wellbore_cv as wcv
 import wellbore_features as wbfeat
+import wellbore_geology_boundary as wbgb
 from wellbore_join import attach_typewell_by_tvt
 
 # Columns to keep out of the |r| > threshold game (identifiers, targets, masks).
@@ -55,7 +56,7 @@ def prune_correlated_features(
     df: pd.DataFrame,
     target_col: str,
     *,
-    threshold: float = 0.95,
+    threshold: float = 0.90,
     protect_cols: Sequence[str] | None = None,
     feature_cols: Sequence[str] | None = None,
 ) -> tuple[pd.DataFrame, PruneResult]:
@@ -222,6 +223,7 @@ def load_merged_with_alonghole_features(
     use_roll: bool = True,
     use_lag: bool = True,
     allow_tvt_input_fallback: bool = False,
+    use_milestone3_geology_boundary: bool = True,
 ) -> pd.DataFrame | None:
     """
     Load tidied lateral + paired typewell, join on TVT, add roll/lag like the V3 notebook.
@@ -231,6 +233,9 @@ def load_merged_with_alonghole_features(
     ``allow_tvt_input_fallback``: set True for **test** tidied horizontals that omit ``TVT``
     (see :func:`_ensure_lateral_tvt_for_join`). Leave False for training so ``TVT`` is never
     silently borrowed from ``TVT_input``.
+
+    ``use_milestone3_geology_boundary``: when True, append ``tw_geology_next_change_ft`` from
+    the paired typewell (set False only if callers skip typewell-based Milestone 3).
     """
     if not lateral_path.is_file():
         return None
@@ -255,6 +260,8 @@ def load_merged_with_alonghole_features(
         merged["TVT_input_ffill"] = merged["TVT_input"].ffill().bfill()
     else:
         merged["TVT_input_ffill"] = np.nan
+    if use_milestone3_geology_boundary:
+        merged = wbgb.add_tw_geology_next_change_ft(merged, typewell_df)
     if use_roll:
         merged = wbfeat.add_alonghole_roll_features(merged)
     if use_lag:
@@ -292,6 +299,7 @@ def export_pruned_merged_tabular(
     use_roll: bool = True,
     use_lag: bool = True,
     allow_tvt_input_fallback: bool = False,
+    use_milestone3_geology_boundary: bool = True,
 ) -> int:
     """
     Write one merged CSV per lateral under ``dest_root``, mirroring relative paths from ``data_root``.
@@ -311,6 +319,7 @@ def export_pruned_merged_tabular(
             use_roll=use_roll,
             use_lag=use_lag,
             allow_tvt_input_fallback=allow_tvt_input_fallback,
+            use_milestone3_geology_boundary=use_milestone3_geology_boundary,
         )
         if merged is None:
             continue

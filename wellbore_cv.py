@@ -56,6 +56,15 @@ def default_train_root() -> Path:
     return raw
 
 
+def default_test_root() -> Path:
+    """Prefer ``data/tidytest`` when it actually contains laterals; else ``data/test``."""
+    tidy = REPO_ROOT / "data" / "tidytest"
+    raw = REPO_ROOT / "data" / "test"
+    if tidy.is_dir() and discover_lateral_csvs(tidy):
+        return tidy
+    return raw
+
+
 def build_well_fold_manifest(
     data_root: Path,
     *,

@@ -41,6 +41,7 @@ def merge_lateral_typewell_schema_tvt(
     Return lateral_df plus typewell-derived columns joined on TVT.
 
     - tw_GR / tw_Geology / tw_TVT: left merge on exact TVT equality (sparse for tw_GR).
+      ``tw_Geology`` is always present; it is all-NaN when the typewell CSV has no ``Geology`` column.
     - tw_GR_interp: piecewise-linear interp of typewell GR to each lateral TVT;
       NaN outside the typewell TVT knot span (left/right=np.nan).
     - lat_tvt_below_tw_min / lat_tvt_above_tw_max: per-well counts (same values on
@@ -77,10 +78,13 @@ def merge_lateral_typewell_schema_tvt(
     if "Geology" in typewell_one_row_per_tvt.columns:
         typewell_for_exact_merge["tw_Geology"] = typewell_one_row_per_tvt["Geology"].to_numpy()
 
+    # Always carry tw_Geology on the merged lateral grid (competition test typewells may omit Geology).
     merge_columns = ["TVT", "tw_GR", "tw_TVT"] + (
         ["tw_Geology"] if "tw_Geology" in typewell_for_exact_merge.columns else []
     )
     merged = lateral_df.merge(typewell_for_exact_merge[merge_columns], on="TVT", how="left", sort=False)
+    if "tw_Geology" not in merged.columns:
+        merged["tw_Geology"] = np.nan
 
     lateral_tvt = lateral_df["TVT"].to_numpy(dtype=float)
     lateral_tvt_finite = np.isfinite(lateral_tvt)
